@@ -4,7 +4,7 @@ namespace SpriteKind {
 
 //  sprites
 let me = sprites.create(assets.image`me`, SpriteKind.Player)
-controller.moveSprite(me)
+//  controller.move_sprite(me) # remove
 me.setPosition(20, 20)
 me.setStayInScreen(true)
 let skull = sprites.create(assets.image`flaming skull`, SpriteKind.Enemy)
@@ -77,15 +77,17 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Projectile, function game_over(p
 sprites.onOverlap(SpriteKind.rock, SpriteKind.rock, function fix_double_rock(rock: Sprite, other_rock: Sprite) {
     sprites.allOfKind(SpriteKind.rock).pop().destroy()
 })
+function reactivate_controls() {
+    controller.moveSprite(me)
+    me.setVelocity(0, 0)
+}
+
+//  timer.after(100, reactivate_controls) # remove
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function knock_back(player: Sprite, skull: Sprite) {
-    controller.moveSprite(me, 0, 0)
+    //  controller.move_sprite(me, 0, 0) # remove
     player.sayText("ow", 500)
     let angle = spriteutils.angleFrom(skull, player)
     spriteutils.setVelocityAtAngle(player, angle, 150)
-    timer.after(100, function reactivate_controls() {
-        controller.moveSprite(me)
-        me.setVelocity(0, 0)
-    })
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.rock, function overlap_rock(player: Sprite, rock: Sprite) {
     let angle = spriteutils.angleFrom(rock, player)

@@ -4,7 +4,7 @@ class SpriteKind:
 
 # sprites
 me = sprites.create(assets.image("me"), SpriteKind.player)
-controller.move_sprite(me)
+# controller.move_sprite(me) # remove
 me.set_position(20, 20)
 me.set_stay_in_screen(True)
 skull = sprites.create(assets.image("flaming skull"), SpriteKind.enemy)
@@ -79,11 +79,11 @@ def reactivate_controls():
     me.set_velocity(0, 0)
 
 def knock_back(player, skull):
-    controller.move_sprite(me, 0, 0)
+    # controller.move_sprite(me, 0, 0) # remove
     player.say_text("ow", 500)
     angle = spriteutils.angle_from(skull, player)
     spriteutils.set_velocity_at_angle(player, angle, 150)
-    timer.after(100, reactivate_controls)
+    # timer.after(100, reactivate_controls) # remove
 sprites.on_overlap(SpriteKind.player, SpriteKind.enemy, knock_back)
 
 def overlap_rock(player, rock):
