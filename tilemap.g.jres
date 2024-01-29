@@ -4,18 +4,6 @@
         "mimeType": "image/x-mkcd-f4",
         "tilemapTile": true
     },
-    "tile1": {
-        "data": "hwQQABAAAABFJEJCRVRFREQiIiJEQlVVREIiIkRCRFVFIiJEJCJCVUVERFQkQkJFVERUVSQiQkVUVVVVRCJURURERFVFQlREJCJCRFVEVCQiIkIkVFVVJCJERCJCVUUiIlREQkJVJCREVUUiQkVCQkRVRSJERSIkRFVEIlRFIkJURSRCVFVERA==",
-        "mimeType": "image/x-mkcd-f4",
-        "tilemapTile": true,
-        "displayName": "myTile"
-    },
-    "tile2": {
-        "data": "hwQQABAAAAC7u7u7uxuxu7u7u7u7G7G7u7u8u7u7u7sbsbu7u7u7uxuxu7u7u7u7u7u7u7y7u7u7u7u7u7sbu7u7u7u7u7u7u7u7u7u7u7u7u8y7u7u7u7u7zLu7u7u7u7u7u7u7u7u7u7u7u7u8u8u7u7u7u7u7u7u7u7u7u8u7u7u7u7u7uw==",
-        "mimeType": "image/x-mkcd-f4",
-        "tilemapTile": true,
-        "displayName": "stone"
-    },
     "*": {
         "mimeType": "image/x-mkcd-f4",
         "dataEncoding": "base64",

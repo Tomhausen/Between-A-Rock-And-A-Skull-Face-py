@@ -13,6 +13,12 @@ animation.runMovementAnimation(skull, animation.animationPresets(animation.bobbi
 //  setup
 scene.setBackgroundImage(assets.image`background`)
 spriteutils.setConsoleOverlay(true)
+//  gh
+//  variables
+let is_moving = false
+let acceleration = 8
+let deceleration = 0.9
+//  /gh
 function fire() {
     for (let i = 0; i < randint(1, 3); i++) {
         timer.background(function spawn_rock() {
@@ -31,6 +37,7 @@ function fire() {
             rock.lifespan = frame_len * anim.length
         })
     }
+    pause(500)
     music.play(music.melodyPlayable(music.buzzer), music.PlaybackMode.UntilDone)
     if (randint(1, 2) == 2) {
         generate_projectiles(50)
@@ -64,11 +71,9 @@ sprites.onDestroyed(SpriteKind.Projectile, function on_destroy(proj: Sprite) {
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.rock, function hit_rock(proj: Sprite, rock: Sprite) {
     proj.destroy()
 })
-function game_over(player: any, proj: any) {
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Projectile, function game_over(player: Sprite, proj: Sprite) {
     game.over(false)
-}
-
-//  sprites.on_overlap(SpriteKind.player, SpriteKind.projectile, game_over)
+})
 sprites.onOverlap(SpriteKind.rock, SpriteKind.rock, function fix_double_rock(rock: Sprite, other_rock: Sprite) {
     sprites.allOfKind(SpriteKind.rock).pop().destroy()
 })
@@ -85,4 +90,41 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function knock_back(playe
 sprites.onOverlap(SpriteKind.Player, SpriteKind.rock, function overlap_rock(player: Sprite, rock: Sprite) {
     let angle = spriteutils.angleFrom(rock, player)
     spriteutils.placeAngleFrom(player, angle, 16, rock)
+})
+//  gh
+function movement() {
+    if (controller.up.isPressed()) {
+        me.vy -= acceleration
+    } else if (controller.down.isPressed()) {
+        me.vy += acceleration
+    }
+    
+    if (controller.left.isPressed()) {
+        me.vx -= acceleration
+    } else if (controller.right.isPressed()) {
+        me.vx += acceleration
+    }
+    
+    me.vx *= deceleration
+    me.vy *= deceleration
+}
+
+function move_check() {
+    
+    if (Math.abs(me.vx) > 8 || Math.abs(me.vy) > 8) {
+        if (!is_moving) {
+            animation.runImageAnimation(me, assets.animation`walking`, 100, true)
+            is_moving = true
+        }
+        
+    } else {
+        animation.stopAnimation(animation.AnimationTypes.All, me)
+        is_moving = false
+    }
+    
+}
+
+game.onUpdate(function tick() {
+    movement()
+    move_check()
 })

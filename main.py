@@ -15,9 +15,17 @@ animation.run_movement_animation(skull, animation.animation_presets(animation.bo
 scene.set_background_image(assets.image("background"))
 spriteutils.set_console_overlay(True)
 
+# gh
+# variables
+is_moving = False
+acceleration = 8
+deceleration = 0.9
+# /gh
+
 def fire():
     for i in range(randint(1, 3)):
         timer.background(spawn_rock)
+    pause(500)
     music.play(music.melody_playable(music.buzzer), music.PlaybackMode.UNTIL_DONE)
     if randint(1, 2) == 2:
         generate_projectiles(50)
@@ -60,7 +68,7 @@ sprites.on_overlap(SpriteKind.projectile, SpriteKind.rock, hit_rock)
 
 def game_over(player, proj):
     game.over(False)
-# sprites.on_overlap(SpriteKind.player, SpriteKind.projectile, game_over)
+sprites.on_overlap(SpriteKind.player, SpriteKind.projectile, game_over)
 
 def fix_double_rock(rock, other_rock):
     sprites.all_of_kind(SpriteKind.rock).pop().destroy()
@@ -83,5 +91,31 @@ def overlap_rock(player, rock):
     spriteutils.place_angle_from(player, angle, 16, rock)
 sprites.on_overlap(SpriteKind.player, SpriteKind.rock, overlap_rock)
 
-# movement: anim and momentum
-# deflect and boss health
+# gh
+def movement():
+    if controller.up.is_pressed():
+        me.vy -= acceleration
+    elif controller.down.is_pressed():
+        me.vy += acceleration
+    if controller.left.is_pressed():
+        me.vx -= acceleration
+    elif controller.right.is_pressed():
+        me.vx += acceleration
+    me.vx *= deceleration
+    me.vy *= deceleration
+    
+def move_check():
+    global is_moving
+    if Math.abs(me.vx) > 8 or Math.abs(me.vy) > 8:
+        if not is_moving:
+            animation.run_image_animation(me, assets.animation("walking"), 100, True)
+            is_moving = True
+    else:
+        animation.stop_animation(animation.AnimationTypes.ALL, me)
+        is_moving = False
+
+def tick():
+    movement()
+    move_check()
+game.on_update(tick)
+# /gh
