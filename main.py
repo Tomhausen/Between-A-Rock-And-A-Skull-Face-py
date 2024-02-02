@@ -1,6 +1,7 @@
 @namespace
 class SpriteKind:
     rock = SpriteKind.create()
+    player_projectile = SpriteKind.create() # 
 
 # sprites
 me = sprites.create(assets.image("me"), SpriteKind.player)
@@ -8,6 +9,8 @@ me = sprites.create(assets.image("me"), SpriteKind.player)
 me.set_position(20, 20)
 me.set_stay_in_screen(True)
 skull = sprites.create(assets.image("flaming skull"), SpriteKind.enemy)
+boss_health = statusbars.create(20, 4, StatusBarKind.health) #
+boss_health.attach_to_sprite(skull) #
 animation.run_image_animation(skull, assets.animation("flaming"), 150, True)
 animation.run_movement_animation(skull, animation.animation_presets(animation.bobbing), 4000, True)
 
@@ -15,12 +18,11 @@ animation.run_movement_animation(skull, animation.animation_presets(animation.bo
 scene.set_background_image(assets.image("background"))
 spriteutils.set_console_overlay(True)
 
-# gh
 # variables
 is_moving = False
 acceleration = 8
 deceleration = 0.9
-# /gh
+blocking = False #
 
 def fire():
     for i in range(randint(1, 3)):
@@ -66,13 +68,38 @@ def hit_rock(proj, rock):
     proj.destroy()
 sprites.on_overlap(SpriteKind.projectile, SpriteKind.rock, hit_rock)
 
-def game_over(player, proj):
-    game.over(False)
+def game_over(player, proj): # edit 
+    if blocking:
+        proj.set_kind(SpriteKind.player_projectile)
+        proj.vx *= -1
+        proj.vy *= -1
+    else:
+        game.over(False)
 sprites.on_overlap(SpriteKind.player, SpriteKind.projectile, game_over)
 
 def fix_double_rock(rock, other_rock):
     sprites.all_of_kind(SpriteKind.rock).pop().destroy()
 sprites.on_overlap(SpriteKind.rock, SpriteKind.rock, fix_double_rock)
+
+def boss_hit(boss, proj): # 
+    health_bar = statusbars.get_status_bar_attached_to(StatusBarKind.health, skull)
+    health_bar.value -= 50
+    proj.destroy()
+    if health_bar.value < 1:
+        game.over(True)
+sprites.on_overlap(SpriteKind.enemy, SpriteKind.player_projectile, boss_hit)
+
+def block(): #
+    global blocking
+    me.set_image(assets.image("shield"))
+    blocking = True
+    pause(1000)
+    me.set_image(assets.image("me"))
+    blocking = False
+
+def throttle_block(): #
+    timer.throttle("block", 2000, block)
+controller.A.on_event(ControllerButtonEvent.PRESSED, throttle_block)
 
 def reactivate_controls():
     controller.move_sprite(me)
@@ -91,7 +118,6 @@ def overlap_rock(player, rock):
     spriteutils.place_angle_from(player, angle, 16, rock)
 sprites.on_overlap(SpriteKind.player, SpriteKind.rock, overlap_rock)
 
-# gh
 def movement():
     if controller.up.is_pressed():
         me.vy -= acceleration
@@ -118,4 +144,3 @@ def tick():
     movement()
     move_check()
 game.on_update(tick)
-# /gh

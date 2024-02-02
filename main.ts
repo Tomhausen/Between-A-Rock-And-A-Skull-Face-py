@@ -1,24 +1,30 @@
 namespace SpriteKind {
     export const rock = SpriteKind.create()
+    export const player_projectile = SpriteKind.create()
 }
 
+//  
 //  sprites
 let me = sprites.create(assets.image`me`, SpriteKind.Player)
 //  controller.move_sprite(me) # remove
 me.setPosition(20, 20)
 me.setStayInScreen(true)
 let skull = sprites.create(assets.image`flaming skull`, SpriteKind.Enemy)
+let boss_health = statusbars.create(20, 4, StatusBarKind.Health)
+// 
+boss_health.attachToSprite(skull)
+// 
 animation.runImageAnimation(skull, assets.animation`flaming`, 150, true)
 animation.runMovementAnimation(skull, animation.animationPresets(animation.bobbing), 4000, true)
 //  setup
 scene.setBackgroundImage(assets.image`background`)
 spriteutils.setConsoleOverlay(true)
-//  gh
 //  variables
 let is_moving = false
 let acceleration = 8
 let deceleration = 0.9
-//  /gh
+let blocking = false
+// 
 function fire() {
     for (let i = 0; i < randint(1, 3); i++) {
         timer.background(function spawn_rock() {
@@ -72,10 +78,40 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.rock, function hit_rock(proj
     proj.destroy()
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Projectile, function game_over(player: Sprite, proj: Sprite) {
-    game.over(false)
+    //  edit 
+    if (blocking) {
+        proj.setKind(SpriteKind.player_projectile)
+        proj.vx *= -1
+        proj.vy *= -1
+    } else {
+        game.over(false)
+    }
+    
 })
 sprites.onOverlap(SpriteKind.rock, SpriteKind.rock, function fix_double_rock(rock: Sprite, other_rock: Sprite) {
     sprites.allOfKind(SpriteKind.rock).pop().destroy()
+})
+sprites.onOverlap(SpriteKind.Enemy, SpriteKind.player_projectile, function boss_hit(boss: Sprite, proj: Sprite) {
+    //  
+    let health_bar = statusbars.getStatusBarAttachedTo(StatusBarKind.Health, skull)
+    health_bar.value -= 50
+    proj.destroy()
+    if (health_bar.value < 1) {
+        game.over(true)
+    }
+    
+})
+controller.A.onEvent(ControllerButtonEvent.Pressed, function throttle_block() {
+    // 
+    timer.throttle("block", 2000, function block() {
+        // 
+        
+        me.setImage(assets.image`shield`)
+        blocking = true
+        pause(1000)
+        me.setImage(assets.image`me`)
+        blocking = false
+    })
 })
 function reactivate_controls() {
     controller.moveSprite(me)
@@ -93,7 +129,6 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.rock, function overlap_rock(play
     let angle = spriteutils.angleFrom(rock, player)
     spriteutils.placeAngleFrom(player, angle, 16, rock)
 })
-//  gh
 function movement() {
     if (controller.up.isPressed()) {
         me.vy -= acceleration
